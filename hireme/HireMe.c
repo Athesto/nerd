@@ -81,33 +81,55 @@ u8 input[32]={
 };
 /**
  * Forward - Decode input into output
- * @input: a string Ex. password
- * @output: output string it has to be equal to input
- * @confusion: it's a substitution box
+ * @input: a 32bit code Ex. "password"
+ * @output: is a 32bit code that converts into a 16bit answer (Hire me!!!!!!!!)
+ * @confusion: it's a substitution box Ex. confusion(password) = encoded_password
  * @diffusion: it's a 32x32 bit matrix
  *
- * Description: There are 2 fors. The second one 
+ * Description: There are 5 fors
+ * The 1st for is a global encode interation of 256 cicles
+ * The 2nd for is:
+ *  - an substitution of input to output through the confusion
+ *  - clear input
+ * The 3rd for is:
+ *  - every letter in input
+ * The 4th for is:
+ *  - the letter in input is acumulatived xored with output filtred by the equivalent row of diffusion matrix
+ * The 5rd for is the decode statement (32bit encoded_password_x256 -> Hire me!!!!!):
+ *  - 1: it takes the input even letters and send it to the 1rst 256 chars of confusion
+ *  - 2: it takes the input odd letters and send it to the 2nd 256 chars of confusion
+ *  - 3: xor it into output
  */
 void Forward(u8 input[32],u8 output[32],u8 confusion[512],u32 diffusion[32])
 {
-	u32 i;
-	u8 j, k, l;
+	u32 iteration;
+	u8 letter_idx, even_idx, odd_idx, row, col;
+	u8 k;
 
-	for (i = 0; i < 256; i++)
+	for (iteration = 0; iteration < 256; iteration++)
 	{
-		for (j = 0; j < 32; j++)
+		for (letter_idx = 0; letter_idx < 32; letter_idx++)
 		{
-			output[j] = confusion[input[j]];
-			input[j] = 0;
+			output[letter_idx] = confusion[input[letter_idx]];
+			input[letter_idx] = 0;
 		}
 
-		for ( j = 0; j < 32; j++)
+		for ( letter_idx = 0; letter_idx < 32; letter_idx++)
+		{
+			row = letter_idx;
 			for (k = 0; k < 32; k++)
-				input[j] = input[j] ^ output[k] * ((diffusion[j] >> k) & 1);
+			{
+				col = k;
+				/* (diffusion[row] >> col) & 1  == diffusion[row][col] */
+				input[letter_idx] = input[letter_idx] ^ output[k] * ((diffusion[row] >> col) & 1);
+			}
+		}
 	}
-	for (l = 0; l < 16; l++)
+	for (letter_idx = 0; letter_idx < 16; letter_idx++)
 	{
-		output[l] = confusion[input[l * 2]] ^ confusion[input[l * 2 + 1] + 256];
+		even_idx = letter_idx * 2;
+		odd_idx = letter_idx * 2 + 1;
+		output[letter_idx] = confusion[input[even_idx]] ^ confusion[input[odd_idx] + 256];
 	}
 }
 
