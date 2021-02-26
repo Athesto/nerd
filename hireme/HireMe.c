@@ -98,10 +98,14 @@ u8 input[32]={
  *  - filter output with the row of diffusion matrix
  *    - Ex. if output is 'abcde' and the row is '10100', the filtered out is 'a\0c\0\0'
  *  - set the letter in input as an acumulatived xored with each letter of filtered output
- * The 5rd for is the decode statement (32bit encoded_password_x256 -> Hire me!!!!!):
- *  - 1: it takes the input even letters and encode it with the 1rst 256 chars of confusion
- *  - 2: it takes the input odd letters and encode it with the 2nd 256 chars of confusion
- *  - 3: xor even letters and odd letters into output
+ * The 5rd for is the decode statement (32bytes encoded_password_x256 -> 16bytes Hire me!!!!!):
+ *  - get the even letters of input and subtitute it with its equivalent in the 1st 256 chars of confusion array
+ *    - input = abcdef -> even_input = a_c_e_ = ace -> confusion(ace) = ???
+ *    - 32 bytes input -> 16 bytes even_input
+ *  - get the  odd letters of input and subtitute it with its equivalent in the 2nd 256 chars of confusion array
+ *    - input = abcdef ->  odd_input = _b_d_f = bdf -> confusion_256(bdf) = ???
+ *    - 32 bytes input -> 16 bytes odd_input
+ *  - set output as even_input xor odd_input
  */
 void Forward(u8 input[32],u8 output[32],u8 confusion[512],u32 diffusion[32])
 {
