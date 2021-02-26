@@ -83,22 +83,25 @@ u8 input[32]={
  * Forward - Decode input into output
  * @input: a 32bit code Ex. "password"
  * @output: is a 32bit code that converts into a 16bit answer (Hire me!!!!!!!!)
- * @confusion: it's a substitution box Ex. confusion(password) = encoded_password
- * @diffusion: it's a 32x32 bit matrix
+ * @confusion: (array) it's a substitution box Ex. confusion(password) = encoded_password
+ * @diffusion: (matrix) it's a 32x32 bit matrix
  *
  * Description: There are 5 fors
  * The 1st for is a global encode interation of 256 cicles
- * The 2nd for is:
- *  - an substitution of input to output through the confusion
+ *  - it rewrite the input 256 times
+ * The 2nd for is to:
+ *  - seting output with the substitution of input in the confusion array
  *  - clear input
- * The 3rd for is:
- *  - every letter in input
+ * The 3rd for is for:
+ *  - Iterate every letter in input and every row in diffusion array
  * The 4th for is:
- *  - the letter in input is acumulatived xored with output filtred by the equivalent row of diffusion matrix
+ *  - filter output with the row of diffusion matrix
+ *    - Ex. if output is 'abcde' and the row is '10100', the filtered out is 'a\0c\0\0'
+ *  - set the letter in input as an acumulatived xored with each letter of filtered output
  * The 5rd for is the decode statement (32bit encoded_password_x256 -> Hire me!!!!!):
- *  - 1: it takes the input even letters and send it to the 1rst 256 chars of confusion
- *  - 2: it takes the input odd letters and send it to the 2nd 256 chars of confusion
- *  - 3: xor it into output
+ *  - 1: it takes the input even letters and encode it with the 1rst 256 chars of confusion
+ *  - 2: it takes the input odd letters and encode it with the 2nd 256 chars of confusion
+ *  - 3: xor even letters and odd letters into output
  */
 void Forward(u8 input[32],u8 output[32],u8 confusion[512],u32 diffusion[32])
 {
